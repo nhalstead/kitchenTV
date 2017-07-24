@@ -31,7 +31,7 @@ $ipchecker=0;
 
 // ##### IP Refresh Time #####
 $ipRefreshTime = 3600*24;
-$ip = "";
+$ip = ""; // Do not set for a Dynamic IP address.
 
 if(!isset($ip) || $ip == "") {
     if (file_exists("ip.cache") && (time() - filemtime("ip.cache") < $ipRefreshTime)) { 
