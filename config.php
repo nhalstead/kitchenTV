@@ -29,10 +29,33 @@ $wunit = "C";
 // ##### IP Checker, 0=off 1=on #####
 $ipchecker=0;
 
-// ##### Your IP address #####
-// You need to update this if your IP changes to turn off the on-screen warining
-// To check your ip visit whatismyip.com
-$ip="153.189.6.28";
+// ##### IP Refresh Time #####
+$ipRefreshTime = 3600*24;
+$ip = "";
+
+if(!isset($ip) || $ip == "") {
+    if (file_exists("ip.cache") && (time() - filemtime("ip.cache") < $ipRefreshTime)) { 
+        $ip = file_get_contents("ip.cache"); // Get the Cache File
+    } else {
+        // ##### Your IP address #####
+            $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL,"https://api.ipify.org?format=text");
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);   // Disables HTTPS Check
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);   // Disables HTTPS Check
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);      
+            $ip = curl_exec($ch);
+
+        // If curl has an issue use the alternative method. (Not Preferred)
+        // CURL Error Codes: https://curl.haxx.se/libcurl/c/libcurl-errors.html
+            if(curl_errno($ch)) {
+                file_put_contents("error_curl.log", $date." - cURL said: ". curl_error($ch));
+                $ip = file_get_contents("https://api.ipify.org?format=text");
+            }
+        
+        if(!isset($ip) || $ip == "") { $ip = "0.0.0.0"; } //Set the IP to 0.0.0.0 since everything has failed.
+        file_put_contents("ip.cache", $ip); // Put the Cache File
+    }
+}
 
 // alternate file method - just create this text file with your IP & nothing else.
 //$ip=file_get_contents('ip.txt');
